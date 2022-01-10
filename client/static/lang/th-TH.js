@@ -1,0 +1,58 @@
+export default () => {
+  return new Promise(function (resolve) {
+    resolve({
+      common: {
+        login: 'login',
+        login_create: 'Register',
+        login_createde: 'Don t have an account?',
+        login_or: 'SMS Gateway',
+        login_email: 'Email',
+        login_password: 'Password',
+        login_remember: 'Remember',
+        login_forgot: 'I forgot my password',
+        logintitle: 'Sign in to start your session',
+        continue: 'Continue',
+        reset: 'Reset your password',
+        reset_password: 'Reset password',
+        register: 'Register',
+        register_name: 'Name? *',
+        register_email: 'Email? *',
+        register_password: 'Password',
+        register_confirm: 'Confirm Password',
+        register_title: 'Nice to meet you :)',
+        register_subtitle: 'Just register to join with us',
+        form_privacy: 'Service & Privacy Policy *',
+        form_send: 'Send Message',
+        form_terms: 'I have read and accept the Terms of',
+      },
+      layouts: {
+        header_theme: 'โหมดธีม',
+        header_light: 'แสงสว่าง',
+        header_dark: 'มืด',
+        header_language: 'ภาษา',
+        en: 'English',
+        th: 'ไทย',
+      },
+      saasLanding: {
+        header_Profile: 'Profile',
+        header_Logout: 'Logout',
+        Dashboard: 'แผงควบคุม',
+        Pending: 'รอดำเนินการ',
+        Scheduled: 'ตามกำหนด',
+        Queued: 'เข้าคิว',
+        Sent: 'Sส่งแล้วent',
+        Failed: 'ล้มเหลว',
+        Received: 'ได้รับ',
+        PendingUSSDRequests: 'คำขอ USSD รอดำเนินการ',
+        PenSentUSSDRequestsding: 'คำขอ USSD ส่งแล้ว',
+        AvailableCredits: 'เครดิตที่มีอยู่',
+        ActiveSubscriptions: 'การสมัครสมาชิกที่ใช้งานอยู่',
+        Earnings: 'รายได้',
+        moreinfo: 'ข้อมูลเพิ่มเติม',
+      },
+      Drawer: {
+        dashboard: 'แผงควบคุม',
+      },
+    })
+  })
+}

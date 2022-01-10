@@ -1,0 +1,733 @@
+<template>
+  <div>
+    <editor-menu-bubble
+      v-slot="{ commands, isActive, getMarkAttrs, menu }"
+      class="menububble"
+      :editor="editor"
+      @hide="hideLinkMenu"
+    >
+      <div
+        class="menububble"
+        :class="{ 'is-active': menu.isActive }"
+        :style="`left: ${menu.left}px; bottom: ${menu.bottom}px;`"
+      >
+        <form
+          v-if="linkMenuIsActive"
+          class="menububble__form"
+          @submit.prevent="setLinkUrl(commands.link, linkUrl)"
+        >
+          <input
+            ref="linkInput"
+            v-model="linkUrl"
+            class="menububble__input linkam"
+            type="text"
+            placeholder="link + inter"
+            @keydown.esc="hideLinkMenu"
+          />
+          <button
+            class="menububble__button"
+            type="button"
+            @click="setLinkUrl(commands.link, null)"
+          >
+            <v-icon>mdi-close</v-icon>
+          </button>
+        </form>
+
+        <template v-else>
+          <button
+            class="menubar__button"
+            :class="{ 'is-active': isActive.bold() }"
+            @click.prevent="commands.bold"
+          >
+            <v-icon size="26" color="#000">mdi-format-bold</v-icon>
+          </button>
+
+          <v-menu
+            :close-on-content-click="true"
+            :nudge-width="130"
+            content-class="emoji_select"
+            right
+            block
+            :offset-y="true"
+          >
+            <template #activator="{ on }">
+              <button block class="menubar__button" type="button" v-on="on">
+                <v-icon size="26" color="#000" class="deforme"
+                  >mdi-format-header-increase</v-icon
+                >
+              </button>
+            </template>
+
+            <div class="icon_pack text-center menubar__button2">
+              <button
+                class="menubar__button"
+                :class="{ 'is-active': isActive.paragraph() }"
+                @click.prevent="commands.paragraph"
+              >
+                <span class="pl-4">Paragraph</span>
+              </button>
+
+              <button
+                class="menubar__button heading1"
+                :class="{ 'is-active': isActive.heading({ level: 1 }) }"
+                @click.prevent="commands.heading({ level: 1 })"
+              >
+                <span class="pl-4">Heading 1</span>
+              </button>
+              <br />
+
+              <button
+                class="menubar__button heading2"
+                :class="{ 'is-active': isActive.heading({ level: 2 }) }"
+                @click.prevent="commands.heading({ level: 2 })"
+              >
+                <span class="pl-4">Heading 2</span>
+              </button>
+              <br />
+
+              <button
+                class="menubar__button heading3"
+                :class="{ 'is-active': isActive.heading({ level: 3 }) }"
+                @click.prevent="commands.heading({ level: 3 })"
+              >
+                <span class="pl-4">Heading 3</span>
+              </button>
+              <br />
+
+              <button
+                class="menubar__button heading4"
+                :class="{ 'is-active': isActive.heading({ level: 4 }) }"
+                @click.prevent="commands.heading({ level: 4 })"
+              >
+                <span class="pl-4">Heading 4</span>
+              </button>
+              <br />
+
+              <button
+                class="menubar__button heading5"
+                :class="{ 'is-active': isActive.heading({ level: 5 }) }"
+                @click.prevent="commands.heading({ level: 5 })"
+              >
+                <span class="pl-4">Heading 5</span>
+              </button>
+              <br />
+
+              <button
+                class="menubar__button heading6"
+                :class="{ 'is-active': isActive.heading({ level: 6 }) }"
+                @click.prevent="commands.heading({ level: 6 })"
+              >
+                <span class="pl-4">Heading 6</span>
+              </button>
+            </div>
+          </v-menu>
+
+          <button
+            class="menubar__button"
+            :class="{ 'is-active': isActive.italic() }"
+            @click.prevent="commands.italic"
+          >
+            <v-icon size="25" color="#000" class="deforme"
+              >mdi-format-italic</v-icon
+            >
+          </button>
+
+          <button
+            class="menubar__button"
+            :class="{ 'is-active': isActive.underline() }"
+            @click.prevent="commands.underline"
+          >
+            <v-icon size="22" color="#000" class="deforme"
+              >mdi-format-underline</v-icon
+            >
+          </button>
+
+          <button
+            class="menubar__button"
+            :class="{ 'is-active': isActive.strike() }"
+            @click.prevent="commands.strike"
+          >
+            <v-icon size="21" color="#000" class="deforme"
+              >mdi-format-strikethrough-variant</v-icon
+            >
+          </button>
+
+          <button
+            class="menubar__button"
+            :class="{ 'is-active': isActive.bullet_list() }"
+            @click.prevent="commands.bullet_list"
+          >
+            <v-icon size="22" color="#000" class="deforme"
+              >mdi-format-list-bulleted</v-icon
+            >
+          </button>
+
+          <button
+            class="menubar__button"
+            :class="{ 'is-active': isActive.ordered_list() }"
+            @click.prevent="commands.ordered_list"
+          >
+            <v-icon size="22" color="#000" class="deforme"
+              >mdi-format-list-numbered</v-icon
+            >
+          </button>
+
+          <button
+            class="menubar__button"
+            :class="{
+              'is-active': editor.activeMarkAttrs.aligntext.align === 'left',
+            }"
+            @click.prevent="commands.aligntext({ align: 'left' })"
+          >
+            <v-icon size="20" color="#000" class="deforme"
+              >mdi-format-align-left</v-icon
+            >
+          </button>
+
+          <button
+            class="menubar__button"
+            :class="{
+              'is-active': editor.activeMarkAttrs.aligntext.align === 'center',
+            }"
+            @click.prevent="commands.aligntext({ align: 'center' })"
+          >
+            <v-icon size="20" color="#000" class="deforme"
+              >mdi-format-align-center</v-icon
+            >
+          </button>
+
+          <button
+            class="menubar__button"
+            :class="{
+              'is-active': editor.activeMarkAttrs.aligntext.align === 'right',
+            }"
+            @click.prevent="commands.aligntext({ align: 'right' })"
+          >
+            <v-icon size="20" color="#000" class="deforme"
+              >mdi-format-align-right</v-icon
+            >
+          </button>
+
+          <button
+            class="menubar__button"
+            @click.prevent="imageUpload = !imageUpload"
+          >
+            <v-icon size="21" color="#000" class="deforme"
+              >mdi-image-plus</v-icon
+            >
+          </button>
+
+          <button
+            class="menubar__button"
+            @click.prevent="commands.horizontal_rule"
+          >
+            <v-icon size="21" color="#000" class="deforme">mdi-minus</v-icon>
+          </button>
+
+          <v-menu
+            :close-on-content-click="false"
+            :nudge-width="250"
+            content-class="emoji_select"
+            right
+            :offset-y="true"
+          >
+            <template #activator="{ on }">
+              <button class="menubar__button" type="button" v-on="on">
+                <v-icon size="21" color="#000" class="deforme"
+                  >mdi-emoticon-happy-outline</v-icon
+                >
+              </button>
+            </template>
+
+            <div class="icon_pack text-center">
+              <span
+                v-for="(emoji, i) in emojis"
+                :key="i"
+                class="icon_pack_span"
+                @click="addEmoji(emoji.text)"
+                >{{ emoji.text }}</span
+              >
+            </div>
+          </v-menu>
+
+          <button
+            class="menububble__button"
+            :class="{ 'is-active': isActive.link() }"
+            @click.prevent="showLinkModal(getMarkAttrs('link'))"
+          >
+            <v-icon size="19" color="#000" class="deforme"
+              >mdi-link-variant-plus</v-icon
+            >
+          </button>
+
+          <v-menu
+            :close-on-content-click="true"
+            :nudge-width="250"
+            content-class="emoji_select"
+            left
+            :offset-y="true"
+          >
+            <template #activator="{ on }">
+              <button class="menubar__button" type="button" v-on="on">
+                <v-icon size="21" color="#000" class="deforme"
+                  >mdi-palette</v-icon
+                >
+              </button>
+            </template>
+
+            <div class="icon_pack text-center">
+              <span
+                v-for="(color, i) in colors"
+                :key="i"
+                class="pointer"
+                :class="{
+                  'is-active1': isActive.textColor({
+                    level: 'text-' + color.name,
+                  }),
+                }"
+                @click.prevent="
+                  commands.textColor({ level: 'text-' + color.name })
+                "
+                ><v-icon :color="color.color">mdi-circle</v-icon></span
+              >
+            </div>
+          </v-menu>
+        </template>
+
+        <!-- image uploader dialog -->
+        <v-dialog v-model="imageUpload" max-width="400px">
+          <h4 class="col-12 px-0 mt-0">
+            <v-icon color="#000" class="mr-1" size="20"
+              >mdi-cloud-upload-outline</v-icon
+            >
+            Image send
+            <v-icon
+              color="red"
+              class="float-right"
+              size="25"
+              @click="imageUpload = !imageUpload"
+              >mdi-close</v-icon
+            >
+          </h4>
+
+          <v-divider class="col-12"></v-divider>
+
+          <form
+            ref="imageUpload"
+            class="col-12 px-0 py-0"
+            action=""
+            autocomplete="off"
+            @submit.prevent="addImage(commands.image)"
+          >
+            <v-text-field
+              v-model="imageUrl"
+              label="Image Absolute URL"
+              outlined
+              hide-details
+            ></v-text-field>
+
+            <v-btn type="submit" color="info" class="mt-4" height="40"
+              >Send</v-btn
+            >
+          </form>
+        </v-dialog>
+
+        <v-dialog v-model="linkModal" width="400">
+          <header class="pa-4 font-weight-bold">
+            Add\edit link
+            <v-icon
+              class="float-right"
+              color="error"
+              @click="linkModal = !linkModal"
+              >mdi-close</v-icon
+            >
+          </header>
+          <v-divider></v-divider>
+          <div class="pa-4 pt-7 texam">
+            <v-form autocomplete="off">
+              <v-text-field
+                v-model="linkUrl"
+                label="link"
+                height="50"
+                hide-details
+                class="mb-5 size14"
+                outlined
+              ></v-text-field>
+
+              <v-checkbox
+                v-model="linkNewTab"
+                label="Open in new tab"
+                hide-details
+              ></v-checkbox>
+            </v-form>
+
+            <v-btn color="info" class="mt-4" @click="sendLink(commands.link)"
+              >Add link</v-btn
+            >
+          </div>
+        </v-dialog>
+      </div>
+    </editor-menu-bubble>
+
+    <editor-content class="editor__content" :editor="editor" />
+  </div>
+</template>
+<script>
+import {
+  Editor,
+  EditorContent as editorContent,
+  EditorMenuBubble,
+} from 'tiptap'
+
+import { DOMParser } from 'prosemirror-model'
+
+import {
+  Blockquote,
+  BulletList,
+  CodeBlock,
+  HardBreak,
+  Heading,
+  ListItem,
+  Strike,
+  OrderedList,
+  TodoItem,
+  TodoList,
+  HorizontalRule,
+  Bold,
+  Code,
+  Italic,
+  Image,
+  History,
+  Underline,
+} from 'tiptap-extensions'
+
+import CustomLink from '@/plugins/customLink'
+// eslint-disable-next-line import/no-duplicates
+import TextColor from '@/plugins/textColor'
+
+// eslint-disable-next-line import/no-duplicates
+import Paragraph from '@/plugins/textColor'
+import AlignText from '@/plugins/tiptap-align.js'
+
+export default {
+  name: 'TestPage',
+  components: {
+    editorContent,
+    EditorMenuBubble,
+  },
+  // eslint-disable-next-line vue/prop-name-casing
+  // eslint-disable-next-line vue/require-prop-types
+  props: ['editorContent'],
+
+  data() {
+    return {
+      linkNewTab: false,
+      linkUrl: null,
+      linkModal: false,
+
+      /**
+       * this is main editor object
+       * elements must be define in 'extension' prop of this object
+       */
+
+      editor: new Editor({
+        extensions: [
+          new Blockquote(),
+          new BulletList(),
+          new CodeBlock(),
+          new TextColor(),
+          new Underline(),
+          new HardBreak(),
+          new Heading({ levels: [1, 2, 3, 4, 5, 6] }),
+          new ListItem(),
+          new OrderedList(),
+          new HorizontalRule(),
+          new TodoItem(),
+          new TodoList(),
+          new CustomLink(),
+          new Paragraph(),
+          new Image(),
+          new Bold(),
+          new Code(),
+          new Italic(),
+          new History(),
+          new AlignText(),
+          new Strike(),
+        ],
+
+        /**
+         * this is default content of editor
+         */
+        content:
+          '<p>normal text<br/><strong>Bold</strong></p><h1>Heading1</h1><h2>Heading2</h2><h3>Heading3</h3><p><em>Italic</em></p><p><u>Underline</u></p><p><s>Strike</s></p><p>Unordered list:</p><ul><li><p>option1</p></li><li><p>option2</p></li></ul><p></p><p>Ordered list</p><ol><li><p>option1</p></li><li><p>option2</p></li></ol><p></p><p>left align</p><p><span style="text-align: center; display: block">center align</span></p><p><span style="text-align: right; display: block">right align</span></p><p></p><p><img src="https://cdn.vuetifyjs.com/docs/images/logos/vuetify-logo-light-text.svg"></p><h2></h2><hr><p></p><p>😉😍🙄😑</p><p><a href="https://github.com/mohammadYousefiDev" rel="noopener noreferrer nofollow">Link without target</a></p><p><a href="https://github.com/mohammadYousefiDev" target="_blank" rel="noopener noreferrer nofollow">Link with target _blank</a></p><p></p><p><span class="custom-style text-success">Green text</span></p><p><span class="custom-style text-primary">Blue text</span></p>',
+
+        /**
+         * this prop gets updated editor content
+         */
+        onUpdate: ({ getHTML }) => {
+          /**
+           * save new content in custom data
+           */
+          this.content = getHTML()
+        },
+      }),
+
+      /**
+       * This data is main content of your text editor
+       * You can send to backend api
+       */
+      content: '',
+
+      linkMenuIsActive: false,
+      emojis: [
+        { text: '😃' },
+        { text: '😉' },
+        { text: '😋' },
+        { text: '😎' },
+        { text: '😍' },
+        { text: '🙄' },
+        { text: '😑' },
+        { text: '🤔' },
+        { text: '😥' },
+        { text: '🤐' },
+        { text: '😫' },
+        { text: '😲' },
+        { text: '😭' },
+        { text: '😡' },
+        { text: '😬' },
+        { text: '😴' },
+      ],
+      colors: [
+        { name: 'primary', color: '#007bff' },
+        { name: 'success', color: '#28a745' },
+        { name: 'warning', color: '#ffc107' },
+        { name: 'danger', color: '#dc3545' },
+        { name: 'info', color: '#17a2b8' },
+        { name: 'dark', color: '#343a40' },
+      ],
+
+      img: null,
+
+      imageUrl: '',
+      imageUpload: false,
+    }
+  },
+
+  watch: {
+    // content: function()
+    // {
+
+    // },
+
+    EditorContent(params) {
+      this.editor.setContent(params)
+    },
+  },
+
+  methods: {
+    showLinkModal(attr) {
+      const { selection, state } = this.editor
+      const { from, to } = selection
+      const text = state.doc.textBetween(from, to, ' ')
+
+      if (text === '') {
+        alert('Please select some text')
+        return
+      }
+
+      this.linkModal = true
+
+      if (attr.target === '_blank') {
+        this.linkNewTab = true
+      }
+
+      this.linkUrl = attr.href
+    },
+
+    sendLink(command) {
+      if (this.linkNewTab) {
+        command({ href: this.linkUrl, target: '_blank' })
+      } else {
+        command({ href: this.linkUrl })
+      }
+
+      this.linkModal = false
+    },
+
+    elementFromString(value) {
+      const element = document.createElement('div')
+      element.innerHTML = value.trim()
+
+      return element
+    },
+
+    insertHTML({ state, view }, value) {
+      const { selection } = state
+      const element = this.elementFromString(value)
+      const slice = DOMParser.fromSchema(state.schema).parseSlice(element)
+      const transaction = state.tr.insert(selection.anchor, slice.content)
+
+      this.editor.view.dispatch(transaction)
+    },
+
+    addEmoji(emoji) {
+      const transaction = this.editor.state.tr.insertText(emoji)
+      this.editor.view.dispatch(transaction)
+    },
+
+    /**
+     * image upload
+     */
+    addImage(command) {
+      if (this.imageUrl === '') return
+
+      const src = this.imageUrl
+
+      command({ src })
+
+      this.imageUrl = ''
+      this.imageUpload = !this.imageUpload
+    },
+  },
+}
+</script>
+<style lang="scss" scoped>
+// @import '~vuetify/dist/vuetify.min.css';
+
+// @import '~@mdi/font/css/materialdesignicons.min.css';
+
+.ProseMirror {
+  height: 500px;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  outline: none;
+  padding: 21px;
+  font-size: 23px;
+  font-family: sans-serif;
+  overflow-y: scroll;
+
+  a {
+    color: blue;
+  }
+
+  img {
+    max-width: 100%;
+  }
+
+  ul,
+  ol {
+    padding-left: 60px;
+  }
+}
+
+.v-dialog {
+  background: #fff;
+  margin: 0;
+  padding: 10px 15px;
+}
+
+.editor {
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.menububble {
+  border: 1px solid #ddd;
+  border-radius: 30px;
+  padding: 7px 15px;
+  margin-bottom: 10px;
+  background: #fafafa;
+}
+
+.menubar__button,
+.menububble__button {
+  margin-left: 7px;
+  border: 1px solid #fafafa;
+  padding: 2px;
+}
+
+.menubar__button2 button {
+  width: 100%;
+  margin: 0;
+  text-align: left;
+  font-weight: bold;
+}
+
+.menubar__button2 .heading1 {
+  font-size: 32px;
+}
+
+.menubar__button2 .heading2 {
+  font-size: 28px;
+}
+
+.menubar__button2 .heading3 {
+  font-size: 24px;
+}
+
+.menubar__button2 .heading4 {
+  font-size: 20px;
+}
+
+.menubar__button2 .heading5 {
+  font-size: 16px;
+}
+
+.menubar__button2 .heading6 {
+  font-size: 12px;
+}
+
+.linkam {
+  height: 35px;
+  direction: ltr !important;
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 30px;
+  outline: none;
+}
+
+button.is-active {
+  border: 1px solid #ddd !important;
+  background: #f5f5f5;
+  border-radius: 30px;
+  padding: 2px;
+}
+
+.icon_pack {
+  background: #fff;
+  padding: 10px;
+  font-size: 20px;
+
+  .icon_pack_span {
+    cursor: pointer;
+  }
+}
+
+.pointer {
+  cursor: pointer;
+}
+
+.text-dark {
+  color: #343a40 !important;
+}
+
+.text-primary {
+  color: #007bff !important;
+}
+
+.text-success {
+  color: #28a745 !important;
+}
+
+.text-warning {
+  color: #ffc107 !important;
+}
+
+.text-danger {
+  color: #dc3545 !important;
+}
+
+.text-info {
+  color: #17a2b8 !important;
+}
+</style>
